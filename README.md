@@ -1,3 +1,3 @@
 # Games
 
-Game ideas
+Just some random game concepts
