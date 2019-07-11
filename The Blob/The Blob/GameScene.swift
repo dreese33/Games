@@ -72,9 +72,17 @@ class GameScene: SKScene {
             
             newShape.position = CGPoint(x: x, y: y)
             newShape.fillColor = UIColor.black
+            
             self.shapeArray.append(newShape)
             self.addChild(newShape)
             
+            /*
+             Replace the code below with an algorithm that
+             will have the ability to detect how close the game
+             is to the total quantity of shapes and calculates
+             the size/quantity of the next shapes using the
+             results
+            */
             self.currentShapeQuantity! += 1
         }
     }
@@ -134,3 +142,36 @@ class Level {
         shapeQuantityTotalAlgorithm()
     }
 }
+
+extension SKShapeNode {
+    @IBInspectable var shapeQuantity: CGFloat {
+        set {
+            self.shapeQuantity = 0
+        }
+        
+        get {
+            return self.shapeQuantity
+        }
+    }
+    
+    func calculateShapeQuantity(interval: Interval) -> Int {
+        let random = CGFloat.random(in: 0...1)
+        
+        //Different shapes will be made in the switch below
+        switch interval {
+        case .SMALL:
+            return Int(random * 50)
+        case .MEDIUM:
+            return Int(random * 100)
+        case .LARGE:
+            return Int(random * 200)
+        }
+    }
+}
+
+enum Interval {
+    case SMALL
+    case MEDIUM
+    case LARGE
+}
+
