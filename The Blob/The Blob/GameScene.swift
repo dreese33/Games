@@ -19,6 +19,8 @@ class GameScene: SKScene {
     
     private var currentShapeQuantity: Int?
     private var halfScreenSize: CGSize?
+    
+    private var shapeColors: [UIColor] = [UIColor.red, UIColor.blue, UIColor.black, UIColor.gray, UIColor.yellow, UIColor.green, UIColor.orange, UIColor.purple, UIColor.white]
 
     override func didMove(to view: SKView) {
         blobNode = SKShapeNode(ellipseIn: CGRect(x: 50, y: 50, width: 100, height: 100))
@@ -66,12 +68,14 @@ class GameScene: SKScene {
         // Called before each frame is rendered
         if self.currentShapeQuantity! < shapesLevels[self.currentLevelArr!].shapeQuantityTotal! {
             let newShape = SKShapeNode(circleOfRadius: 10)
+            newShape.fillColor = self.shapeColors[Int.random(in: 0..<self.shapeColors.count)]
             
             let x = CGFloat.random(in: -self.halfScreenSize!.width...self.halfScreenSize!.width)
             let y = CGFloat.random(in: -self.halfScreenSize!.height...self.halfScreenSize!.height)
             
             newShape.position = CGPoint(x: x, y: y)
-            newShape.fillColor = UIColor.black
+            newShape.setScale(0.5)
+            //newShape.fillColor = UIColor.black
             
             self.shapeArray.append(newShape)
             self.addChild(newShape)
@@ -143,6 +147,7 @@ class Level {
     }
 }
 
+
 extension SKShapeNode {
     @IBInspectable var shapeQuantity: CGFloat {
         set {
@@ -154,6 +159,7 @@ extension SKShapeNode {
         }
     }
     
+    /*
     func calculateShapeQuantity(interval: Interval) -> Int {
         let random = CGFloat.random(in: 0...1)
         
@@ -166,12 +172,13 @@ extension SKShapeNode {
         case .LARGE:
             return Int(random * 200)
         }
-    }
+    }*/
 }
 
+/*
 enum Interval {
     case SMALL
     case MEDIUM
     case LARGE
-}
+}*/
 
