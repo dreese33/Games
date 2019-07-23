@@ -9,6 +9,13 @@
 import SpriteKit
 import GameplayKit
 
+enum ShapeTypes {
+    case CIRCLE
+    case RECTANGLE
+    case SQUARE
+    case ELLIPSE
+}
+
 class GameScene: SKScene {
     
     private var blobNode: SKShapeNode?
@@ -17,7 +24,7 @@ class GameScene: SKScene {
     private var shapesLevels: [Level] = []
     private var currentLevelArr: Int?
     
-    private var currentShapeQuantity: Int?
+    private var currentShapeQuantity: CGFloat?
     private var halfScreenSize: CGSize?
     
     private var shapeColors: [UIColor] = [UIColor.red, UIColor.blue, UIColor.black, UIColor.gray, UIColor.yellow, UIColor.green, UIColor.orange, UIColor.purple, UIColor.white]
@@ -67,28 +74,55 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         if self.currentShapeQuantity! < shapesLevels[self.currentLevelArr!].shapeQuantityTotal! {
-            let newShape = SKShapeNode(circleOfRadius: 10)
-            newShape.fillColor = self.shapeColors[Int.random(in: 0..<self.shapeColors.count)]
-            
-            let x = CGFloat.random(in: -self.halfScreenSize!.width...self.halfScreenSize!.width)
-            let y = CGFloat.random(in: -self.halfScreenSize!.height...self.halfScreenSize!.height)
-            
-            newShape.position = CGPoint(x: x, y: y)
-            newShape.setScale(0.5)
-            //newShape.fillColor = UIColor.black
+            let quantity = CGFloat.random(in: 1..<2.5)
+            let newShape = createRandomShape(quantity: quantity)
             
             self.shapeArray.append(newShape)
             self.addChild(newShape)
             
-            /*
-             Replace the code below with an algorithm that
-             will have the ability to detect how close the game
-             is to the total quantity of shapes and calculates
-             the size/quantity of the next shapes using the
-             results
-            */
-            self.currentShapeQuantity! += 1
+            self.currentShapeQuantity! += quantity
+            newShape.shapeQuantity = quantity
         }
+    }
+    
+    func createRandomShape(quantity: CGFloat) -> (SKShapeNode) {
+        let randomShape = Int.random(in: 0..<4)
+        var newShape: SKShapeNode?
+        
+        var modifiableQuantity = quantity
+        
+        let randomSizeDistribution = CGFloat.random(in: 0..<1)
+        switch (randomShape) {
+        case 0:
+            newShape = SKShapeNode(circleOfRadius: 10)
+        case 1:
+            let ellipseSize = CGSize(width: 30 * (1 - randomSizeDistribution), height: 30 * randomSizeDistribution)
+            newShape = SKShapeNode(ellipseOf: ellipseSize)
+        case 2:
+            let rectangleSize = CGSize(width: 30 * randomSizeDistribution, height: 30 * (1 - randomSizeDistribution))
+            newShape = SKShapeNode(rectOf: rectangleSize)
+        case 3:
+            newShape = SKShapeNode(rectOf: CGSize(width: 20, height: 20))
+        default:
+            print("Something went wrong")
+        }
+        
+        newShape!.fillColor = self.shapeColors[Int.random(in: 0..<self.shapeColors.count)]
+        
+        var shapePos = CGPoint(x: CGFloat.random(in: -self.halfScreenSize!.width...self.halfScreenSize!.width), y: CGFloat.random(in: -self.halfScreenSize!.height...self.halfScreenSize!.height))
+        
+        newShape!.position = shapePos
+        newShape!.setScale(modifiableQuantity)
+        
+        while (blobNode!.intersects(newShape!)) {
+            shapePos = CGPoint(x: CGFloat.random(in: -self.halfScreenSize!.width...self.halfScreenSize!.width), y: CGFloat.random(in: -self.halfScreenSize!.height...self.halfScreenSize!.height))
+            
+            modifiableQuantity = CGFloat.random(in: 1..<2.5)
+            newShape!.position = shapePos
+            newShape!.setScale(modifiableQuantity)
+        }
+        
+        return newShape!
     }
     
     func detectBlobShapeCollision() {
@@ -99,7 +133,8 @@ class GameScene: SKScene {
             if self.blobNode!.intersects(shape) {
                 removeIndexes.append(currentIndex)
                 self.removeChildren(in: [shape])
-                self.currentShapeQuantity! -= 1
+
+                self.currentShapeQuantity! -= shape.shapeQuantity
             }
             
             currentIndex += 1
@@ -121,7 +156,7 @@ class Level {
     var levelBackgroundColor: UIColor?
     
     //Amount of available points required on screen at any time
-    var shapeQuantityTotal: Int?
+    var shapeQuantityTotal: CGFloat?
     
     init(level: Int) {
         self.level = level
@@ -137,7 +172,7 @@ class Level {
     }
     
     func shapeQuantityTotalAlgorithm() {
-        self.shapeQuantityTotal = self.level! * 100
+        self.shapeQuantityTotal = CGFloat(self.level!) * 100
     }
     
     func runAll() {
@@ -149,36 +184,17 @@ class Level {
 
 
 extension SKShapeNode {
-    @IBInspectable var shapeQuantity: CGFloat {
-        set {
-            self.shapeQuantity = 0
-        }
-        
-        get {
-            return self.shapeQuantity
-        }
+    struct Holder {
+        static var shapeQuantity: CGFloat = 0.0
     }
     
-    /*
-    func calculateShapeQuantity(interval: Interval) -> Int {
-        let random = CGFloat.random(in: 0...1)
-        
-        //Different shapes will be made in the switch below
-        switch interval {
-        case .SMALL:
-            return Int(random * 50)
-        case .MEDIUM:
-            return Int(random * 100)
-        case .LARGE:
-            return Int(random * 200)
+    var shapeQuantity: CGFloat {
+        get {
+            return Holder.shapeQuantity
         }
-    }*/
+        set(newValue) {
+            Holder.shapeQuantity = newValue
+        }
+    }
 }
-
-/*
-enum Interval {
-    case SMALL
-    case MEDIUM
-    case LARGE
-}*/
 
